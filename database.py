@@ -95,3 +95,19 @@ def recent_texts(limit: int = 30) -> list[str]:
     with _connect() as db:
         rows = db.execute("SELECT text FROM post_logs ORDER BY id DESC LIMIT ?", (limit,)).fetchall()
         return [r["text"] for r in rows]
+
+
+def get_random_logged_text(types: tuple[str, ...] | None = None, limit: int = 200) -> str | None:
+    with _connect() as db:
+        if types:
+            placeholders = ",".join("?" for _ in types)
+            rows = db.execute(
+                f"SELECT text FROM post_logs WHERE type IN ({placeholders}) ORDER BY id DESC LIMIT ?",
+                (*types, limit),
+            ).fetchall()
+        else:
+            rows = db.execute("SELECT text FROM post_logs ORDER BY id DESC LIMIT ?", (limit,)).fetchall()
+        if not rows:
+            return None
+        import random
+        return random.choice(rows)["text"]

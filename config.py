@@ -37,5 +37,5 @@ def load_config() -> Config:
         timezone=getenv("TIMEZONE", "Europe/Kyiv").strip(),
         min_posts_per_day=_int_env("MIN_POSTS_PER_DAY", 15),
         max_posts_per_day=_int_env("MAX_POSTS_PER_DAY", 45),
-        simulation_label=getenv("SIMULATION_LABEL", "true").strip().lower() in {"1", "true", "yes", "y"},
+        simulation_label=getenv("SIMULATION_LABEL", "false").strip().lower() in {"1", "true", "yes", "y"},
     )

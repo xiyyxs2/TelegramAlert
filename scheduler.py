@@ -9,7 +9,7 @@ from apscheduler.triggers.cron import CronTrigger
 from config import Config
 import database
 from alerts import make_alert, make_clear, make_update, make_odd_message, start_alert_in_db, pop_random_alert
-from random_posts import make_regular_post, make_blog_post
+from random_posts import make_regular_post, make_blog_post, make_repeat_post
 from wave import make_wave
 from weather import get_weather_text
 
@@ -25,8 +25,8 @@ async def publish(bot: Bot, cfg: Config, post_type: str, text: str) -> None:
 
 async def publish_random_post(bot: Bot, cfg: Config) -> None:
     kind = random.choices(
-        ["regular", "blog", "odd", "update", "weather", "wave"],
-        weights=[35, 15, 20, 12, 10, 8],
+        ["regular", "blog", "odd", "update", "weather", "wave", "repeat"],
+        weights=[28, 22, 16, 11, 8, 6, 9],
         k=1,
     )[0]
     if kind == "regular":
@@ -39,8 +39,14 @@ async def publish_random_post(bot: Bot, cfg: Config) -> None:
         await publish(bot, cfg, "update", make_update(cfg.simulation_label))
     elif kind == "weather":
         await publish(bot, cfg, "weather", await get_weather_text(cfg.weather_key, cfg.simulation_label))
-    else:
+    elif kind == "wave":
         await publish(bot, cfg, "wave", make_wave(cfg.simulation_label))
+    else:
+        repeated = make_repeat_post(cfg.simulation_label)
+        if repeated:
+            await publish(bot, cfg, "repeat", repeated)
+        else:
+            await publish(bot, cfg, "regular", make_regular_post(cfg.simulation_label))
 
 
 async def publish_alert(bot: Bot, cfg: Config) -> None:
